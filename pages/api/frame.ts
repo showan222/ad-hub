@@ -1,35 +1,25 @@
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { FrameRequest, getFrameHtmlResponse } from "frames.js";
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { createFrame } from '@neynar/nodejs-sdk'
 
-const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
-
-export const config = {
-  runtime: "edge",
-};
-
-export default async function handler(req: Request): Promise<Response> {
-  const body = await req.json();
-  const frameRequest = FrameRequest.parse(body);
-
-  const userFid = frameRequest?.untrustedData?.fid;
-
-  const html = getFrameHtmlResponse({
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const frame = createFrame({
+    title: "Today's Web3 Pick 🚀",
+    image: 'https://raw.githubusercontent.com/showan222/ad-hub/main/public/default-cover.jpg', // یک عکس ساده تا بعداً داینامیک بشه
     buttons: [
       {
-        label: "Visit GitHub",
-        action: "link",
-        target: "https://github.com/showan222/ad-hub",
-      },
+        label: '🔍 View Project',
+        action: 'link',
+        target: 'https://github.com/showan222/ad-hub'
+      }
     ],
-    image: "https://ad-hub-ecru.vercel.app/cover.png",
-    postUrl: "https://ad-hub-ecru.vercel.app/api/frame",
-    ogTitle: "Advantage Hub",
-    ogDescription: `Verified Web3 projects — for you!`,
-  });
+    postUrl: 'https://ad-hub.vercel.app/api/frame',
+    ogTitle: 'Advantage Hub',
+    ogDescription: 'Top Web3 Projects – Daily on Farcaster!',
+    ogImage: 'https://raw.githubusercontent.com/showan222/ad-hub/main/public/default-cover.jpg',
+  })
 
-  return new Response(html, {
-    headers: {
-      "Content-Type": "text/html",
-    },
-  });
+  res.setHeader('Content-Type', 'text/html')
+  res.status(200).send(frame)
 }
+
+export default handler
